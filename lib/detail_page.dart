@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:getwidget/getwidget.dart';
+import 'cart_provider.dart';
 import 'model/product.dart';
 
 class ProductDetailPage extends StatelessWidget {
@@ -37,7 +40,7 @@ class ProductDetailPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(product.name),
-        backgroundColor: const Color(0xFF4282AA),
+        backgroundColor: const Color.fromARGB(255, 35, 165, 194),
         foregroundColor: Colors.white,
       ),
       body: Container(
@@ -123,6 +126,35 @@ class ProductDetailPage extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: GFButton(
+          onPressed: () {
+            // Memanggil method add() dari CartProvider
+            Provider.of<CartProvider>(context, listen: false).add(product);
+
+            // Memberikan notifikasi berhasil
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('${product.name} berhasil ditambahkan!'),
+                duration: const Duration(milliseconds: 1500),
+              ),
+            );
+          },
+
+          text: 'Tambah ke Keranjang',
+          icon: const Icon(Icons.add_shopping_cart, color: Colors.white),
+          size: GFSize.LARGE, // Ukuran tombol besar
+          color: const Color.fromARGB(255, 35, 165, 194), // Warna yang serasi
+          shape: GFButtonShape.pills, // Bentuk sudut melengkung
+          fullWidthButton: true, // Tombol penuh lebar
+          textStyle: const TextStyle(
+            fontSize: 18,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),

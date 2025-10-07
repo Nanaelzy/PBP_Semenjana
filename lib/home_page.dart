@@ -1,15 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'services/device_info_service.dart';
+import 'cart_provider.dart';
 import 'product_list.dart';
 import 'login_page.dart';
-import 'model/product_service.dart';
+import 'services/product_service.dart';
 import 'detail_page.dart';
+import 'cart_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   final String userEmail;
-
   const HomePage({super.key, required this.userEmail});
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final DeviceInfoService _deviceInfoService = DeviceInfoService();
+  Map<String, dynamic> _deviceData = {'model': 'Memuat...', 'platform': '...'};
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDeviceInfo(); // Panggil saat halaman pertama kali dibuat
+  }
+
+  void _loadDeviceInfo() async {
+    try {
+      final data = await _deviceInfoService.getDeviceInfo();
+      // widget.userEmail digunakan untuk mengakses properti dari HomePage (StatefulWidget)
+      print('✅ Device Info for User ${widget.userEmail} loaded: $data');
+      setState(() {
+        _deviceData = data;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _deviceData = {'model': 'Gagal memuat', 'platform': 'Error'};
+        _isLoading = false;
+        print('❌ Error memuat info perangkat: $e');
+      });
+    }
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(
@@ -20,9 +55,26 @@ class HomePage extends StatelessWidget {
           'Selamat Datang',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        backgroundColor: const Color(0xFF4282AA),
+        backgroundColor: const Color.fromARGB(255, 35, 165, 194),
         elevation: 0,
         actions: [
+          Consumer<CartProvider>(
+            builder: (context, cart, child) => Badge(
+              label: Text(cart.itemCount.toString()),
+              isLabelVisible: cart.itemCount > 0,
+              backgroundColor: Colors.amber,
+              child: IconButton(
+                icon: const Icon(Icons.shopping_cart, color: Colors.white),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CartPage()),
+                  );
+                },
+              ),
+            ),
+          ),
+
           IconButton(
             icon: const Icon(Icons.exit_to_app, color: Colors.white),
             onPressed: () {
@@ -33,11 +85,7 @@ class HomePage extends StatelessWidget {
       ),
       body: Container(
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFFFEDA2), Color(0xFF4282AA)],
-          ),
+          color: Color.fromARGB(255, 255, 253, 232),
         ),
 
         child: SingleChildScrollView(
@@ -49,7 +97,7 @@ class HomePage extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
                 decoration: const BoxDecoration(
-                  color: Color(0xFF4282AA),
+                  color: Color.fromARGB(255, 35, 165, 194),
                   borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(30),
                     bottomRight: Radius.circular(30),
@@ -58,8 +106,18 @@ class HomePage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Text(
+                        'Device: ${_isLoading ? 'Memuat...' : _deviceData['model']} (${_deviceData['platform']})',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ),
                     Text(
-                      'Halo, ${userEmail.split('@').first}!', // Menampilkan nama pengguna dari email
+                      'Halo, ${widget.userEmail.split('@').first}!',
                       style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -89,7 +147,7 @@ class HomePage extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF4282AA),
+                        color: Color.fromARGB(255, 35, 165, 194),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -123,7 +181,7 @@ class HomePage extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF4282AA),
+                        color: Color.fromARGB(255, 35, 165, 194),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -143,15 +201,15 @@ class HomePage extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color.fromARGB(
                             255,
-                            255,
-                            255,
-                            255,
+                            35,
+                            165,
+                            194,
                           ),
                           foregroundColor: const Color.fromARGB(
                             255,
-                            0,
-                            105,
-                            161,
+                            255,
+                            255,
+                            255,
                           ),
                           padding: const EdgeInsets.symmetric(
                             horizontal: 40,
@@ -239,7 +297,7 @@ class HomePage extends StatelessWidget {
             subtitle: Text(product.formattedPrice),
             trailing: const Icon(
               Icons.arrow_forward_ios,
-              color: Color(0xFF4282AA),
+              color: Color.fromARGB(255, 35, 165, 194),
             ),
             onTap: () {
               // SINI: Navigasi ke halaman detail produk
@@ -261,6 +319,17 @@ class HomePage extends StatelessWidget {
     String title,
     IconData icon,
   ) {
+    String filterValue;
+    if (title == 'Kemeja') {
+      filterValue = 'shirt';
+    } else if (title == 'Dasi') {
+      filterValue = 'tie';
+    } else if (title == 'Dompet') {
+      filterValue = 'purse';
+    } else {
+      filterValue = 'all';
+    }
+
     return Column(
       children: [
         InkWell(
@@ -268,13 +337,20 @@ class HomePage extends StatelessWidget {
             // Implementasi navigasi ke halaman ProductListPage dengan filter kategori
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const ProductListPage()),
+              MaterialPageRoute(
+                builder: (context) =>
+                    ProductListPage(initialFilter: filterValue),
+              ),
             );
           },
           child: CircleAvatar(
             radius: 30,
             backgroundColor: const Color(0xFFE0EAFC),
-            child: Icon(icon, size: 30, color: const Color(0xFF4282AA)),
+            child: Icon(
+              icon,
+              size: 30,
+              color: const Color.fromARGB(255, 35, 165, 194),
+            ),
           ),
         ),
         const SizedBox(height: 8),

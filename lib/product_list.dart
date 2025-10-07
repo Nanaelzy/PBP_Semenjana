@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'model/product.dart';
-import 'model/product_service.dart';
+import 'services/product_service.dart';
 import 'detail_page.dart';
 
 class ProductListPage extends StatefulWidget {
-  const ProductListPage({super.key});
+  final String initialFilter;
+  const ProductListPage({super.key, this.initialFilter = 'all'});
 
   @override
   State<ProductListPage> createState() => _ProductListPageState();
@@ -21,6 +22,9 @@ class _ProductListPageState extends State<ProductListPage> {
     super.initState();
     loadProducts();
     searchController.addListener(_onSearchChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _filterByAll(widget.initialFilter);
+    });
   }
 
   @override
@@ -84,7 +88,7 @@ class _ProductListPageState extends State<ProductListPage> {
           'Semenjana Handmade Shop',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        backgroundColor: const Color(0xFF4282AA),
+        backgroundColor: const Color.fromARGB(255, 35, 165, 194),
         elevation: 0,
       ),
       body: Container(
@@ -160,9 +164,11 @@ class _ProductListPageState extends State<ProductListPage> {
         selected: isSelected,
         onSelected: (selected) => _filterByAll(value),
         backgroundColor: Colors.white,
-        selectedColor: const Color(0xFF4282AA).withOpacity(0.2),
+        selectedColor: const Color.fromARGB(255, 35, 165, 194).withOpacity(0.2),
         labelStyle: TextStyle(
-          color: isSelected ? const Color(0xFF4282AA) : Colors.black54,
+          color: isSelected
+              ? const Color.fromARGB(255, 35, 165, 194)
+              : Colors.black54,
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
         side: BorderSide(

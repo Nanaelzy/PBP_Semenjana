@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:semenjana/login_page.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -45,6 +46,11 @@ class _SplashScreenState extends State<SplashScreen> {
                 fontStyle: FontStyle.italic,
                 color: Colors.blue,
               ),
+            ),
+            const SizedBox(height: 40),
+            LoadingAnimationWidget.staggeredDotsWave(
+              color: const Color(0xFF4282AA),
+              size: 40,
             ),
           ],
         ),
