@@ -1,8 +1,10 @@
 // lib/pages/cart_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'cart_provider.dart';
-import 'model/cart_item.dart';
+import '../cart_provider.dart';
+import '../model/cart_item.dart';
+import 'package:intl/intl.dart';
+import 'checkout_page.dart';
 
 class CartPage extends StatelessWidget {
   @override
@@ -22,7 +24,7 @@ class CartPage extends StatelessWidget {
               : _buildCartList(context, cart),
           bottomNavigationBar: cart.items.isEmpty
               ? null
-              : _buildSummarySection(cart),
+              : _buildSummarySection(context, cart),
         );
       },
     );
@@ -143,7 +145,7 @@ class CartPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSummarySection(CartProvider cart) {
+  Widget _buildSummarySection(BuildContext context, CartProvider cart) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
@@ -170,14 +172,21 @@ class CartPage extends StatelessWidget {
               Text('Total Harga', style: TextStyle(color: Colors.grey[600])),
               SizedBox(height: 4),
               Text(
-                'Rp ${cart.totalPrice.toStringAsFixed(0)}',
+                NumberFormat.currency(
+                  locale: 'id',
+                  symbol: 'Rp ',
+                  decimalDigits: 0,
+                ).format(cart.totalPrice),
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ],
           ),
           ElevatedButton(
             onPressed: () {
-              /* Logika checkout */
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CheckoutPage()),
+              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.deepOrange,

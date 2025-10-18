@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'model/product.dart';
-import 'services/product_service.dart';
+import '../model/product.dart';
+import '../services/product_service.dart';
 import 'detail_page.dart';
 
 class ProductListPage extends StatefulWidget {
@@ -86,10 +86,13 @@ class _ProductListPageState extends State<ProductListPage> {
       appBar: AppBar(
         title: const Text(
           'Semenjana Handmade Shop',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Color.fromARGB(255, 0, 0, 0),
+          ),
         ),
-        backgroundColor: const Color.fromARGB(255, 35, 165, 194),
-        elevation: 0,
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        elevation: 2,
       ),
       body: Container(
         decoration: const BoxDecoration(
@@ -208,6 +211,7 @@ class _ProductListPageState extends State<ProductListPage> {
               ),
             );
           },
+
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Row(

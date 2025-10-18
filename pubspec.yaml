@@ -38,7 +38,9 @@ dependencies:
   intl: ^0.18.0 
   getwidget: ^7.0.0
   device_info_plus: ^10.0.0
+  shared_preferences: ^2.2.0
   loading_animation_widget:
+  rating_and_feedback_collector: ^0.0.3
 
 dev_dependencies:
   flutter_test:

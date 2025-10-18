@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'services/device_info_service.dart';
-import 'cart_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../services/device_info_service.dart';
+import '../cart_provider.dart';
 import 'product_list.dart';
 import 'login_page.dart';
-import 'services/product_service.dart';
+import '../services/product_service.dart';
 import 'detail_page.dart';
 import 'cart_page.dart';
 
@@ -24,7 +25,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _loadDeviceInfo(); // Panggil saat halaman pertama kali dibuat
+    _loadDeviceInfo();
   }
 
   void _loadDeviceInfo() async {
@@ -47,16 +48,29 @@ class _HomePageState extends State<HomePage> {
 
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(
-        0xFFF5F5F5,
-      ), // Warna latar belakang yang lebih netral
+      backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Color.fromARGB(255, 35, 165, 194),
+          ),
+          onPressed: () {
+            // Aksi ini membuat Anda kembali ke LoginPage (sesi masih tersimpan!)
+            Navigator.pop(context);
+          },
+        ),
+
         title: const Text(
           'Selamat Datang',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Color.fromARGB(255, 35, 165, 194),
+          ),
         ),
-        backgroundColor: const Color.fromARGB(255, 35, 165, 194),
-        elevation: 0,
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        elevation: 2,
         actions: [
           Consumer<CartProvider>(
             builder: (context, cart, child) => Badge(
@@ -64,7 +78,10 @@ class _HomePageState extends State<HomePage> {
               isLabelVisible: cart.itemCount > 0,
               backgroundColor: Colors.amber,
               child: IconButton(
-                icon: const Icon(Icons.shopping_cart, color: Colors.white),
+                icon: const Icon(
+                  Icons.shopping_cart,
+                  color: Color.fromARGB(255, 35, 165, 194),
+                ),
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -76,7 +93,10 @@ class _HomePageState extends State<HomePage> {
           ),
 
           IconButton(
-            icon: const Icon(Icons.exit_to_app, color: Colors.white),
+            icon: const Icon(
+              Icons.exit_to_app,
+              color: Color.fromARGB(255, 35, 165, 194),
+            ),
             onPressed: () {
               _showLogoutDialog(context);
             },
@@ -85,7 +105,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Container(
         decoration: const BoxDecoration(
-          color: Color.fromARGB(255, 255, 253, 232),
+          color: Color.fromARGB(255, 214, 237, 255),
         ),
 
         child: SingleChildScrollView(
@@ -97,11 +117,19 @@ class _HomePageState extends State<HomePage> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
                 decoration: const BoxDecoration(
-                  color: Color.fromARGB(255, 35, 165, 194),
+                  color: Color.fromARGB(255, 255, 255, 255),
                   borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(30),
                     bottomRight: Radius.circular(30),
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 10,
+                      offset: Offset(0, 5),
+                      spreadRadius: 1,
+                    ),
+                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -112,7 +140,7 @@ class _HomePageState extends State<HomePage> {
                         'Device: ${_isLoading ? 'Memuat...' : _deviceData['model']} (${_deviceData['platform']})',
                         style: const TextStyle(
                           fontSize: 12,
-                          color: Colors.white70,
+                          color: Color.fromARGB(255, 35, 165, 194),
                         ),
                       ),
                     ),
@@ -121,13 +149,16 @@ class _HomePageState extends State<HomePage> {
                       style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: Color.fromARGB(255, 35, 165, 194),
                       ),
                     ),
                     const SizedBox(height: 8),
                     const Text(
                       'Temukan produk handmade favoritmu.',
-                      style: TextStyle(fontSize: 16, color: Colors.white70),
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Color.fromARGB(255, 35, 165, 194),
+                      ),
                     ),
                   ],
                 ),
@@ -201,15 +232,15 @@ class _HomePageState extends State<HomePage> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color.fromARGB(
                             255,
-                            35,
-                            165,
-                            194,
+                            254,
+                            255,
+                            255,
                           ),
                           foregroundColor: const Color.fromARGB(
                             255,
-                            255,
-                            255,
-                            255,
+                            38,
+                            121,
+                            177,
                           ),
                           padding: const EdgeInsets.symmetric(
                             horizontal: 40,
@@ -239,7 +270,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
+  void _showLogoutDialog(BuildContext context) async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -255,10 +286,16 @@ class _HomePageState extends State<HomePage> {
             ),
             TextButton(
               child: const Text('Logout'),
-              onPressed: () {
+              onPressed: () async {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.remove('registeredEmail');
+                await prefs.remove('registeredPassword');
+                await prefs.setBool('isLoggedIn', false);
+
                 // Tutup dialog
                 Navigator.of(context).pop();
                 // Kembali ke halaman login
+
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => const LoginPage()),
@@ -345,7 +382,7 @@ class _HomePageState extends State<HomePage> {
           },
           child: CircleAvatar(
             radius: 30,
-            backgroundColor: const Color(0xFFE0EAFC),
+            backgroundColor: const Color.fromARGB(255, 254, 255, 255),
             child: Icon(
               icon,
               size: 30,

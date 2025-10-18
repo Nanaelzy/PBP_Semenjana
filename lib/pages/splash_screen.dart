@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:semenjana/login_page.dart';
+import 'login_page.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -44,11 +44,11 @@ class _SplashScreenState extends State<SplashScreen> {
               style: TextStyle(
                 fontSize: 16,
                 fontStyle: FontStyle.italic,
-                color: Colors.blue,
+                color: Color(0xFF4282AA),
               ),
             ),
             const SizedBox(height: 40),
-            LoadingAnimationWidget.staggeredDotsWave(
+            LoadingAnimationWidget.threeArchedCircle(
               color: const Color(0xFF4282AA),
               size: 40,
             ),

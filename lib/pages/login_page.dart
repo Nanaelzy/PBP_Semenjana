@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'home_page.dart';
+import 'signup_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -41,6 +43,59 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  void _performLogin() async {
+    final userEmail = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (userEmail.isEmpty || password.isEmpty) {
+      _showErrorDialog('Email dan Password tidak boleh kosong.');
+      return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final savedEmail = prefs.getString('registeredEmail');
+    final savedPassword = prefs.getString('registeredPassword');
+
+    if (savedEmail == null || savedEmail != userEmail) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Akun Belum Terdaftar'),
+          content: const Text(
+            'Email tidak ditemukan. Silakan daftar terlebih dahulu.',
+          ),
+          actions: [
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: const Text('Daftar'),
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SignUpPage()),
+                );
+              },
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    if (password == savedPassword) {
+      await prefs.setBool('isLoggedIn', true);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage(userEmail: userEmail)),
+      );
+    } else {
+      _showErrorDialog('Password salah. Silakan coba lagi.');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,7 +123,7 @@ class _LoginPageState extends State<LoginPage> {
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 1, 89, 161),
+                  color: Color.fromARGB(255, 43, 125, 176),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -147,22 +202,12 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  final userEmail = _emailController.text.trim();
-                  final password = _passwordController.text.trim();
-                  if (userEmail.isEmpty || password.isEmpty) {
-                    _showErrorDialog('Email dan Password tidak boleh kosong.');
-                  } else {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HomePage(userEmail: userEmail),
-                      ),
-                    );
-                  }
+                  _performLogin();
                 },
+
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
-                  foregroundColor: const Color(0xFF4282AA),
+                  foregroundColor: const Color.fromARGB(255, 43, 125, 176),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,
                     vertical: 12,
@@ -181,16 +226,30 @@ class _LoginPageState extends State<LoginPage> {
                     'Pengguna Baru? ',
                     style: TextStyle(color: Colors.white),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      // Aksi ketika teks "Daftar" ditekan
-                    },
-                    child: const Text(
-                      'Daftar',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.underline,
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SignUpPage(),
+                          ),
+                        );
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 4.0,
+                          vertical: 2.0,
+                        ),
+                        child: Text(
+                          'Daftar',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
                       ),
                     ),
                   ),
